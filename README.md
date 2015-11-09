@@ -1,4 +1,6 @@
 # MaratonGameServer
-Maraton game server is written by pure c++, supports Windows, Linux, MacOS and uses C++ 11 standards 
+Maraton game server is a game server with forcus on network framework.
+It's written by pure c++ with C++ 11 standards, supports Windows, Linux.
 
-Depends on <a href='http://libuv.org/'>libuv</a>
+It's dependent on:
+<a href='http://libuv.org/'>libuv</a>
