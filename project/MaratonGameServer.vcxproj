@@ -161,6 +161,7 @@
     <ClCompile Include="..\source\Server.cpp" />
     <ClCompile Include="..\source\Service.cpp" />
     <ClCompile Include="..\source\Session.cpp" />
+    <ClCompile Include="..\source\Utils.cpp" />
     <ClCompile Include="game-main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -168,6 +169,7 @@
     <ClInclude Include="..\include\Server.h" />
     <ClInclude Include="..\include\Service.h" />
     <ClInclude Include="..\include\Session.h" />
+    <ClInclude Include="..\include\Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

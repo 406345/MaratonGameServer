@@ -12,7 +12,7 @@ void Server::uv_callback_alloc_buffer( uv_handle_t* handle,
     if ( nullptr == session ) return; 
 
     buf->base = session->recive_buffer();
-    buf->len = SESSION_RECIVE_BUFFER_LENGTH;
+    buf->len  = SESSION_RECIVE_BUFFER_LENGTH;
 }
 
 void Server::uv_callback_read( uv_stream_t* stream,
@@ -23,7 +23,11 @@ void Server::uv_callback_read( uv_stream_t* stream,
 
     if ( nullptr == session ) return;
 
-    if ( 0 > nread ) return;
+    if ( 0 > nread )
+    {
+        uv_close( ( uv_handle_t* ) session->conn_, uv_callback_close ); 
+        return;
+    }
 
     session->on_recive_data( buf->base, nread );
 }
@@ -33,8 +37,9 @@ void Server::uv_callback_close( uv_handle_t* handle )
     Session* session = static_cast< Session* >( handle->data );
 
     if ( nullptr == session ) return;
-
+ 
     session->close();
+    session->service->close_session_callback_( session );
 
     SAFE_DELETE( session );
 }
@@ -52,6 +57,11 @@ void Server::uv_callback_on_new_connection( uv_stream_t* server, int status )
 
     if ( uv_accept( server, ( uv_stream_t* ) session->conn_ ) == 0 )
     {
+        if ( service->new_session_callback_ != nullptr )
+        {
+            service->new_session_callback_( session );
+        }
+
         uv_read_start( ( uv_stream_t* ) session->conn_, uv_callback_alloc_buffer, uv_callback_read );
     }
     else 
@@ -67,15 +77,15 @@ uv_loop_t * Server::loop()
 
 void Server::add_service( Service * srv )
 {
+    int r = uv_listen( ( uv_stream_t* ) &srv->sock_, 0, uv_callback_on_new_connection );
     service_list.push_back( srv );
 }
 
 void Server::run()
 {
-    for ( Service* srv : this->service_list )
+    /*for ( Service* srv : this->service_list )
     {
-        int r = uv_listen( ( uv_stream_t* ) &srv->sock_, 0, uv_callback_on_new_connection );
-    }
+    }*/
 
     uv_run( Server::loop(), UV_RUN_DEFAULT );
 }

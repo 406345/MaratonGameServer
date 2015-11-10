@@ -11,7 +11,7 @@ Service::~Service()
     SAFE_DELETE( this->ip_ );
 }
 
-void Service::init( const char * ip, int port )
+void Service::listen( const char * ip, int port )
 {
     memcpy( this->ip_, ip, 4 );
     uv_tcp_init( Server::loop(), &this->sock_ );
@@ -23,8 +23,18 @@ void Service::init( const char * ip, int port )
     uv_tcp_bind( &this->sock_, ( const struct sockaddr* )&addr, 0 );
 }
 
+void Service::new_session_cb( session_callback_t callback )
+{
+    this->new_session_callback_ = callback;
+}
+
+void Service::close_session_cb( session_callback_t callback )
+{
+    this->close_session_callback_ = callback;
+}
+
 Session * Service::create_session()
 {
-    return new Session();
+    return new Session(this);
 }
  

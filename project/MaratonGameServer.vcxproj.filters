@@ -19,6 +19,9 @@
     <ClCompile Include="..\source\Session.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="..\source\Utils.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\Service.h">
@@ -31,6 +34,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\Session.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Utils.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

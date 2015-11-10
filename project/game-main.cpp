@@ -2,14 +2,20 @@
 #include "Service.h"
 
 int main()
-{
-    Server server;
+{ 
+    Service service;
+    service.listen( "0.0.0.0", 1234 );
+    service.new_session_cb( [] ( Session* s ) { 
+        printf( "New Session[%ld] Connected \r\n" , s->id() );
+    } );
 
-    Service _1234;
-    _1234.init( "0.0.0.0", 1234 );
+    service.close_session_cb( [] ( Session* s ) { 
+        printf( "Session[%ld] Disconnected \r\n" , s->id() );
+    } );
+    
+    Server::instance()->add_service( &service );
 
-    server.add_service( &_1234 );
-    server.run();
+    Server::instance()->run();
 
     return 0;
 }

@@ -6,10 +6,12 @@
 
 #include <vector>
 #include "uv.h"
+#include "Utils.h"
 
 class Service;
 
-class Server
+class Server :
+    public Singleton<Server>
 {
 public:
 
@@ -19,8 +21,13 @@ public:
 
 protected:
 
+    Server() {};
+
 private:
 
+    
+    ~Server() {};
+   
     std::vector<Service*> service_list;
 
     static void uv_callback_alloc_buffer( uv_handle_t* handle,
@@ -32,6 +39,8 @@ private:
                                   const uv_buf_t* buf );
     static void uv_callback_close( uv_handle_t* handle );
     static void uv_callback_on_new_connection( uv_stream_t* server, int status );
+
+    friend class Singleton<Server>;
 };
 
 #endif // SERVER_H_
