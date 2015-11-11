@@ -1,6 +1,3 @@
-//Maraton Game Server
-//Create by Shubo Yang
-
 #ifndef SERVER_H_
 #define SERVER_H_
 
@@ -16,7 +13,7 @@ class Server :
 public:
 
     static uv_loop_t* loop();
-    void add_service( Service * srv );
+    bool add_service( Service * srv );
     void run();
 
 protected:
@@ -38,7 +35,8 @@ private:
                                   ssize_t nread,
                                   const uv_buf_t* buf );
     static void uv_callback_close( uv_handle_t* handle );
-    static void uv_callback_on_new_connection( uv_stream_t* server, int status );
+    static void uv_callback_new_connection( uv_stream_t* server, int status );
+    static void uv_callback_connected( uv_connect_t * req, int status );
 
     friend class Singleton<Server>;
 };

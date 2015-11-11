@@ -22,6 +22,12 @@
     <ClCompile Include="..\source\Utils.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="..\source\CircleBuffer.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\SessionManager.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\Service.h">
@@ -37,6 +43,12 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\Utils.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\CircleBuffer.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\SessionManager.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,6 +1,3 @@
-//Maraton Game Server
-//Create by Shubo Yang
-
 #ifndef SESSION_H_
 #define SESSION_H_
 
@@ -8,7 +5,6 @@
 #include "Define.h"
 
 
-const int SESSION_RECIVE_BUFFER_LENGTH = 1024 * 1024;
 class Service;
 
 class Session
@@ -29,10 +25,11 @@ protected:
 
 private:
 
-    Service*  service;
-    uv_tcp_t* conn_;
-    char*     recive_buffer_;
-    size_t    session_id_;
+    Service*        service;
+    uv_tcp_t*       listener_;
+    char*           recive_buffer_;
+    size_t          session_id_;
+    uv_connect_t*   connector_;
 
     char*       recive_buffer() { return this->recive_buffer_; };
     static void uv_prcoess_write_callback( uv_write_t* req, int status );
