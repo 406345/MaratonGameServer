@@ -159,6 +159,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\source\CircleBuffer.cpp" />
+    <ClCompile Include="..\source\HTTPClient.cpp" />
+    <ClCompile Include="..\source\HTTPRequest.cpp" />
     <ClCompile Include="..\source\Server.cpp" />
     <ClCompile Include="..\source\Service.cpp" />
     <ClCompile Include="..\source\Session.cpp" />
@@ -169,6 +171,8 @@
   <ItemGroup>
     <ClInclude Include="..\include\CircleBuffer.h" />
     <ClInclude Include="..\include\Define.h" />
+    <ClInclude Include="..\include\HTTPClient.h" />
+    <ClInclude Include="..\include\HTTPRequest.h" />
     <ClInclude Include="..\include\Server.h" />
     <ClInclude Include="..\include\Service.h" />
     <ClInclude Include="..\include\Session.h" />

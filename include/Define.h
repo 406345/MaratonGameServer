@@ -46,4 +46,7 @@ public:                                                     \
 
 #define SINGLETON_END };
 
+#define UV_ERROR(__x__) if ( __x__ != 0 ) printf( "uv error: %s", uv_strerror(__x__));
+
+
 #endif // DEFINE_H_

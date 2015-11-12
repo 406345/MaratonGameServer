@@ -1,9 +1,27 @@
 #include "Server.h"
 #include "Service.h"
 #include "SessionManager.h"
-
+#include "HTTPClient.h"
 int main()
 { 
+    int size, length, capacity;
+    std::string str1 = "123456789\012";
+    size = str1.size();
+    length = str1.length();
+    capacity = str1.capacity();
+    
+    
+    std::string str2 = "123456789";
+
+    HTTPUrlParser p( "http://www.baidu.com" );
+
+    HTTPClient c;
+
+    HTTPRequest* req = new HTTPRequest();
+    req->url( "http://www.baidu.com" );
+    req->method( "GET" );
+    c.request( req );
+
     //Service service1;
     //service1.listen( "0.0.0.0", 1234 );
     //service1.new_session_cb( [] ( Session* s ) {
