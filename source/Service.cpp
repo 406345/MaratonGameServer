@@ -4,41 +4,46 @@
 
 Service::Service()
 {
-    this->ip_ = new char[128];
-    memset( this->ip_, 0, 128 ); 
-    this->sock_ = { 0 };
+    this->ip_     = new char[512] { 0 };
+    this->host_   = new char[512] { 0 };
+    this->uv_tcp_ = { 0 };
     this->addr_in = { 0 };
-    this->conn_ = { 0 };
+    this->uv_connect_ = { 0 };
 }
 
 Service::~Service()
 {
     SAFE_DELETE( this->ip_ );
+    SAFE_DELETE( this->host_ );
 }
 
 void Service::listen( const char * ip, int port )
 {
     this->service_type_ = ServiceType::kServer;
     memcpy( this->ip_, ip, strlen( ip ) );
-    uv_tcp_init( Server::loop(), &this->sock_ );
+    uv_tcp_init( Server::loop(), &this->uv_tcp_ );
 
-    this->sock_.data = this;
+    this->uv_tcp_.data = this;
 
     sockaddr_in addr;
     uv_ip4_addr( this->ip_, port, &addr );
-    uv_tcp_bind( &this->sock_, ( const struct sockaddr* )&addr, 0 );
+    uv_tcp_bind( &this->uv_tcp_, ( const struct sockaddr* )&addr, 0 );
 }
 
 void Service::connect( const char * ip, int port )
 {
     this->service_type_ = ServiceType::kClient;
-    memcpy( this->ip_, ip, strlen(ip) );
-    uv_tcp_init( Server::loop(), &this->sock_ );
+    memcpy( this->host_, ip, strlen(ip) );
+    this->port_ = port;
 
-    this->sock_.data = this;
-    this->conn_.data = this;
+    uv_tcp_init( Server::loop(), &this->uv_tcp_ );
+    this->uv_tcp_.data = this;
 
-    uv_ip4_addr( this->ip_, port, &this->addr_in ); 
+}
+
+void Service::operation_failed_cb( service_callback_t callback )
+{
+    this->operation_failed_callback_ = callback;
 }
 
 void Service::new_session_cb( session_callback_t callback )
@@ -53,7 +58,7 @@ void Service::close_session_cb( session_callback_t callback )
 
 Session * Service::create_session()
 {
-    auto ret = new Session(this); 
+    Session * ret = new Session( this );
     return ret;
 }
  

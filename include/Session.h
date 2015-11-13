@@ -3,7 +3,7 @@
 
 #include "uv.h"
 #include "Define.h"
-
+#include "Buffer.h"
 
 class Service;
 
@@ -14,14 +14,14 @@ public:
     Session( Service* service );
     virtual ~Session();
     
-    virtual void close();
-    virtual void send( const char* data, size_t size );
+    virtual void    close();
+    virtual void    send( Buffer buffer );
 
-    size_t id() { return this->session_id_; };
+    size_t          id() { return this->session_id_; };
 
 protected:
 
-    virtual void on_recive_data( const char* data, size_t length );
+    virtual void    on_recive_data( Buffer buffer );
 
 private:
 
@@ -31,8 +31,8 @@ private:
     size_t          session_id_;
     uv_connect_t*   connector_;
 
-    char*       recive_buffer() { return this->recive_buffer_; };
-    static void uv_prcoess_write_callback( uv_write_t* req, int status );
+    char*           recive_buffer() { return this->recive_buffer_; };
+    static void     uv_prcoess_write_callback( uv_write_t* req, int status );
 
     friend class Server;
 };

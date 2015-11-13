@@ -158,6 +158,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\source\Buffer.cpp" />
     <ClCompile Include="..\source\CircleBuffer.cpp" />
     <ClCompile Include="..\source\HTTPClient.cpp" />
     <ClCompile Include="..\source\HTTPRequest.cpp" />
@@ -169,6 +170,7 @@
     <ClCompile Include="game-main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\Buffer.h" />
     <ClInclude Include="..\include\CircleBuffer.h" />
     <ClInclude Include="..\include\Define.h" />
     <ClInclude Include="..\include\HTTPClient.h" />

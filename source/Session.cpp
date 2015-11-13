@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "Service.h"
 
-Session::Session( Service* service )
+Session::Session( Service * service )
 {
     static size_t cur_session_id    = 0;
     cur_session_id                  = ( cur_session_id + 1 ) % 0xFFFFFFFF;
@@ -18,10 +18,9 @@ Session::~Session()
     SAFE_DELETE( this->recive_buffer_ );
 }
 
-void Session::on_recive_data( const char * data, size_t length )
+void Session::on_recive_data( Buffer buffer )
 {
-    printf( "recived size:%lld\r\n",length );
-    //send( data, length );
+    printf( "recived size:%lld\r\n" , buffer.size() );
 }
 
 void Session::close()
@@ -29,22 +28,21 @@ void Session::close()
 
 }
 
-void Session::send( const char * data, size_t size )
+void Session::send( Buffer buffer )
 {
     uv_write_t* write   = new uv_write_t();
-    uv_buf_t* buffer    = new uv_buf_t();
+    uv_buf_t* buf       = new uv_buf_t();
 
-    buffer->base         = new char[size];
+    buf->base           = new char[buffer.size()] { 0 };
+    buf->len            = buffer.size();
+    write->data         = buf;
 
-    memcpy( buffer->base, data, size );
-
-    buffer->len          = size;
-    write->data         = buffer;
+    memcpy( buf->base, buffer.data(), buffer.size() );
 
     auto r              = uv_write( 
                                     write, 
                                     (uv_stream_t*) this->listener_, 
-                                    buffer, 
+                                    buf, 
                                     1,  
                                     Session::uv_prcoess_write_callback 
                                    );

@@ -34,6 +34,9 @@
     <ClCompile Include="..\source\HTTPRequest.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="..\source\Buffer.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\Service.h">
@@ -61,6 +64,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\HTTPRequest.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Buffer.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

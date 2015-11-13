@@ -2,6 +2,7 @@
 #include "Server.h"
 #include "Session.h"
 #include "Service.h"
+#include "Buffer.h"
 
 void Server::uv_callback_alloc_buffer( uv_handle_t* handle,
                                       size_t suggested_size,
@@ -29,7 +30,9 @@ void Server::uv_callback_read( uv_stream_t* stream,
         return;
     }
 
-    session->on_recive_data( buf->base, nread );
+    Buffer buffer( buf->base , nread );
+
+    session->on_recive_data( std::move( buffer ) );
 }
 
 void Server::uv_callback_close( uv_handle_t* handle )
@@ -50,6 +53,7 @@ void Server::uv_callback_new_connection( uv_stream_t* server, int status )
         fprintf( stderr, "New connection error %s\n", uv_strerror( status ) );
         return;
     }
+
     Service* service = static_cast< Service* >( server->data );
 
     Session* session = service->create_session();
@@ -64,7 +68,9 @@ void Server::uv_callback_new_connection( uv_stream_t* server, int status )
             service->new_session_callback_( session );
         }
 
-        uv_read_start( ( uv_stream_t* ) session->listener_, uv_callback_alloc_buffer, uv_callback_read );
+        uv_read_start( ( uv_stream_t* ) session->listener_, 
+                       uv_callback_alloc_buffer, 
+                       uv_callback_read );
     }
     else 
     {
@@ -77,16 +83,41 @@ void Server::uv_callback_connected( uv_connect_t * req, int status )
     Service* service = static_cast< Service* > ( req->data );
     if ( status < 0 )
     {
-        auto sock = ( uv_tcp_t* ) req->data;
-         
+        if ( service->operation_failed_callback_ != nullptr )
+        {
+            service->operation_failed_callback_( service , status );
+        }
+        
+        Server::instance()->remove_service( service );
+        SAFE_DELETE( service );
         return;
     }
 
     Session* session = service->create_session();
-    session->listener_ = &service->sock_;
+    session->listener_ = &service->uv_tcp_;
     session->listener_->data = session;
     service->new_session_callback_( session );
-    uv_read_start( ( uv_stream_t* ) session->listener_, uv_callback_alloc_buffer, uv_callback_read );
+    uv_read_start( ( uv_stream_t* ) session->listener_, 
+                   uv_callback_alloc_buffer, 
+                   uv_callback_read );
+}
+
+void Server::uv_process_resolved( uv_getaddrinfo_t * req , int status , addrinfo * res )
+{
+    Service* service            = static_cast< Service* >( req->data );
+    char addr[17]               = { 0 };
+    service->uv_tcp_.data       = service;
+    service->uv_connect_.data   = service;
+
+    uv_ip4_name( ( struct sockaddr_in* ) res->ai_addr, addr, 16 );
+    uv_ip4_addr( addr, service->port_, &service->addr_in );
+
+    
+
+    auto result                 = uv_tcp_connect( &service->uv_connect_, &service->uv_tcp_, 
+                                                  ( const struct sockaddr* ) &service->addr_in,
+                                                  Server::uv_callback_connected );
+    UV_ERROR( result );
 }
 
 uv_loop_t * Server::loop()
@@ -103,11 +134,25 @@ bool Server::add_service( Service * srv )
 
     if ( srv->service_type_ == Service::ServiceType::kServer )
     {
-        result = uv_listen( ( uv_stream_t* ) &srv->sock_, 0, uv_callback_new_connection );
+        result = uv_listen( ( uv_stream_t* ) &srv->uv_tcp_, 
+                            0, 
+                            uv_callback_new_connection );
     }
     else if ( srv->service_type_ == Service::ServiceType::kClient )
     {
-        result = uv_tcp_connect( &srv->conn_, &srv->sock_, ( const struct sockaddr* ) &srv->addr_in, Server::uv_callback_connected );
+        srv->uv_addrinfo_.ai_family = PF_INET;
+        srv->uv_addrinfo_.ai_socktype = SOCK_STREAM;
+        srv->uv_addrinfo_.ai_protocol = IPPROTO_TCP;
+        srv->uv_addrinfo_.ai_flags = 0;
+        srv->uv_resolver_.data = srv;
+
+        int r = uv_getaddrinfo( Server::loop() , 
+                                &srv->uv_resolver_,
+                                Server::uv_process_resolved, 
+                                srv->host_, 
+                                NULL, 
+                                &srv->uv_addrinfo_ );
+        UV_ERROR( r ); 
     }
 
     if ( result != 0 )
@@ -117,6 +162,20 @@ bool Server::add_service( Service * srv )
 
     service_list.push_back( srv );
     return true;
+}
+
+bool Server::remove_service( Service * srv )
+{
+    for ( auto itr = service_list.begin(); itr != service_list.end(); itr++ )
+    {
+        if ( ( *itr ) == srv )
+        {
+            service_list.erase( itr );
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void Server::run()
