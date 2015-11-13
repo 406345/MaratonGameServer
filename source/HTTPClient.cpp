@@ -1,11 +1,9 @@
 #include "HTTPClient.h"
 #include "Define.h"
 
-std::string HTTPClient::http_header_ =
-                                        "Accept: */*\r\n" 
-                                        "Accept-Language: zh-cn\r\n"
-                                        "User-Agent: YHGenomics\r\n";
-
+std::string HTTPClient::http_header_ = "Accept: */*\r\n" 
+                                       "Accept-Language: zh-cn\r\n"
+                                       "User-Agent: YHGenomics\r\n";
 
 HTTPClient::HTTPClient()
 {

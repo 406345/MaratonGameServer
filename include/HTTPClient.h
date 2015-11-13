@@ -46,7 +46,6 @@ private:
     uv_buf_t                uv_buffer_;
     uv_connect_t            uv_connect_;
 
-    //HTTPRequest::HTTPMethod              http_method_ = HTTPRequest::HTTPMethod::kGET;
     http_context_callback_t context_callback_;
     HTTPClientStatus        status_ = HTTPClientStatus::kUnknow;
     HTTPRequest *           request_;

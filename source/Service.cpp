@@ -41,17 +41,17 @@ void Service::connect( const char * ip, int port )
 
 }
 
-void Service::operation_failed_cb( service_callback_t callback )
+void Service::on_operation_failed( service_callback_t callback )
 {
     this->operation_failed_callback_ = callback;
 }
 
-void Service::new_session_cb( session_callback_t callback )
+void Service::on_new_session( session_callback_t callback )
 {
     this->new_session_callback_ = callback;
 }
 
-void Service::close_session_cb( session_callback_t callback )
+void Service::on_close_session( session_callback_t callback )
 {
     this->close_session_callback_ = callback;
 }

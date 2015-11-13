@@ -37,6 +37,12 @@
     <ClCompile Include="..\source\Buffer.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="..\source\AsyncWorker.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\SyncWorker.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\Service.h">
@@ -67,6 +73,15 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\Buffer.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\AsyncWorker.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\SyncWorker.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Logger.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

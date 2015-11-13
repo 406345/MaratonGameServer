@@ -2,7 +2,7 @@
 * YHGenomics Inc.
 * Author     : yang shubo
 * Date       : 2015-11-13
-* Description:
+* Description: 
 * * * * * * * * * * * * * * * */
 
 #ifndef HTTP_REQUEST_H_

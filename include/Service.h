@@ -28,9 +28,9 @@ public:
     void listen( const char* ip, int port );
     void connect( const char* ip, int port );
 
-    void operation_failed_cb ( service_callback_t callback );
-    void new_session_cb      ( session_callback_t callback );
-    void close_session_cb    ( session_callback_t callback );
+    void on_operation_failed ( service_callback_t callback );
+    void on_new_session      ( session_callback_t callback );
+    void on_close_session    ( session_callback_t callback );
 
 protected:
 

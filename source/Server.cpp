@@ -89,7 +89,6 @@ void Server::uv_callback_connected( uv_connect_t * req, int status )
         }
         
         Server::instance()->remove_service( service );
-        SAFE_DELETE( service );
         return;
     }
 

@@ -42,8 +42,7 @@ void HTTPUrlParser::parse( std::string url )
 
 void HTTPUrlParser::parse()
 {
-
-    //http://www.baidu.com/axxx/xxx/xxxx;
+    // Demo http://www.baidu.com/axxx/xxx/xxxx;
     const char* purl = this->url_.c_str();
     int len = this->url_.length();
 
@@ -53,7 +52,6 @@ void HTTPUrlParser::parse()
     int domain_pos_end   = len;
 
     int state = 0;
-
 
     for ( int i = 0; i < len; i++ )
     {
@@ -65,7 +63,6 @@ void HTTPUrlParser::parse()
         switch ( state )
         {
             case 0: // search for '//'
-
                 if ( i > 3 && purl[i - 1] == '/' && purl[i - 2] == '/' )
                 {
                     protocol_end     = i - 3;
@@ -74,7 +71,6 @@ void HTTPUrlParser::parse()
                 }
                 break;
             case 1: // search for '/'
-
                 if ( purl[i] == '/' )
                 {
                     state++;
@@ -102,7 +98,6 @@ void HTTPUrlParser::parse()
         this->path_ = std::string( purl + domain_pos_end ,
                                    len - domain_pos_end );
     }
-
 }
 
 HTTPRequest::HTTPRequest()

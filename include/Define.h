@@ -1,13 +1,17 @@
 #ifndef DEFINE_H_
 #define DEFINE_H_
 
-//cast define
+#include <memory>
+#include "Logger.h"
+// Switchers
+// Controls debug mode
+#define DEBUG_MODE 1
 
+// Cast definitions
 #define CIRCLE_BUFFER_SIZE          1024 * 1024
 #define SESSION_RECIVE_BUFFER_SIZE  1024 * 128
 
-//macro function define
-
+// Macro function definitions
 #define PP_DEF(__type__,__name__)                           \
     void __name__(__type__ value){ __name__##_ = value; };  \
     __type__ __name__(){ return __name__##_; };
@@ -46,7 +50,32 @@ public:                                                     \
 
 #define SINGLETON_END };
 
-#define UV_ERROR(__x__) if ( __x__ != 0 ) printf( "uv error: %s", uv_strerror(__x__));
 
+#define UV_ERROR(__x__) if ( __x__ != 0 ) printf( "uv error: %s", \
+                                                  uv_strerror((int)__x__));
+// C11 definitions
+#define UPTR std::unique_ptr
+#define SPTR std::shared_ptr
+#define WPTR std::weak_ptr
+#define DEF_UPTR(__t__,__v__,...)  std::unique_ptr< __t__ > __v__ = \
+                                   std::unique_ptr< __t__ >( new __t__(__VA_ARGS__) )
+                                   
+#define DEF_SPTR(__t__,__v__,...)  std::shared_ptr< __t__ > __v__ =  \
+                                   std::make_shared< __t__ >(__VA_ARGS__)
+
+#define MAKE_UPTR(__t__,...) std::unique_ptr< __t__ >( new __t__(__VA_ARGS__) )
+#define MAKE_SPTR(__t__,...) std::make_shared< __t__ >(__VA_ARGS__)
+#define MOVE(__T__) std::move(__T__);
+
+// Debug mode definitions
+#if DEBUG_MODE
+#define LOG_DEBUG(msg_,...) Logger::log("%s:%d "##msg_,__FILE__,__LINE__,##__VA_ARGS__)
+#else
+#define DEBUG(msg_,...) 
+#endif
+
+// Message definitions
+#define LOG_SYS(msg_,...) Logger::sys(msg_,__VA_ARGS__)
+#define LOG_EERROR(msg_,...) Logger::error(msg_,__VA_ARGS__)
 
 #endif // DEFINE_H_

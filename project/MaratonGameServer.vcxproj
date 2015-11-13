@@ -158,6 +158,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\source\AsyncWorker.cpp" />
     <ClCompile Include="..\source\Buffer.cpp" />
     <ClCompile Include="..\source\CircleBuffer.cpp" />
     <ClCompile Include="..\source\HTTPClient.cpp" />
@@ -166,19 +167,23 @@
     <ClCompile Include="..\source\Service.cpp" />
     <ClCompile Include="..\source\Session.cpp" />
     <ClCompile Include="..\source\SessionManager.cpp" />
+    <ClCompile Include="..\source\SyncWorker.cpp" />
     <ClCompile Include="..\source\Utils.cpp" />
     <ClCompile Include="game-main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\AsyncWorker.h" />
     <ClInclude Include="..\include\Buffer.h" />
     <ClInclude Include="..\include\CircleBuffer.h" />
     <ClInclude Include="..\include\Define.h" />
     <ClInclude Include="..\include\HTTPClient.h" />
     <ClInclude Include="..\include\HTTPRequest.h" />
+    <ClInclude Include="..\include\Logger.h" />
     <ClInclude Include="..\include\Server.h" />
     <ClInclude Include="..\include\Service.h" />
     <ClInclude Include="..\include\Session.h" />
     <ClInclude Include="..\include\SessionManager.h" />
+    <ClInclude Include="..\include\SyncWorker.h" />
     <ClInclude Include="..\include\Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
