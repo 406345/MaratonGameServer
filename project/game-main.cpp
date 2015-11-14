@@ -5,35 +5,38 @@
 #include "Buffer.h"
 #include <memory> 
 #include "SyncWorker.h"
+#include <thread>
+
+void test( );
 
 Service* create( )
 {
-    Service * service2 = new Service( );
-    service2->connect( "127.0.0.1" , 1234 );
-    service2->on_operation_failed( [ ] ( Service * s , size_t status )
+    Service* srv = new Service( );
+    srv->connect( "localhost" , 1234 ); 
+    return srv;
+}
+static std::vector<Service*> v;
+static bool finished = false;
+bool syncworker_callback( SyncWorker* worker )
+{
+    for ( auto s : v )
     {
+        s->stop( );
+        SAFE_DELETE( s );
+    }
+    v.clear( );
 
-    } );
-
-    service2->on_new_session( [ ] ( Session* s )
-    {
-        printf( "New Session[%lld] Connected \r\n" , s->id( ) );
-    } );
-
-    service2->on_close_session( [ ] ( Session* s )
-    {
-        printf( "Session[%lld] Disconnected \r\n" , s->id( ) );
-    } );
-
-    return service2;
+    return true;
+}
+void syncworker_after_callback( SyncWorker* worker )
+{
+    finished=true;
 }
 
-int main( )
+void test( )
 {
-
-    std::vector<Service*> v;
-
-    for ( size_t i = 0; i < 30; i++ )
+    finished=false;
+    for ( size_t i = 0; i < 10; i++ )
     {
         auto srv = create( );
         if ( i > 0 )
@@ -42,23 +45,25 @@ int main( )
         }
     }
 
-    SyncWorker::create( 100 , [ &v ] ( SyncWorker* worker )
-    {
-        LOG_SYS( "SyncWorker" );
-        if ( worker->loop_count( ) > 50 )
+    SyncWorker::create( 5000 , syncworker_callback , syncworker_after_callback , nullptr );
+}
+int main( )
+{
+    test( );
+    SyncWorker::create( 1000 , [ ] ( SyncWorker* worker )
+    { 
+        if( finished )
         {
-            for ( auto s : v )
-            {
-                s->stop( );
-            }
-
-            LOG_SYS( "Service2 stopped" );
-            return true;
+            test( );
         }
         return false;
-    } , nullptr );
+    } , 
+    nullptr , nullptr );
 
-    Server::instance( )->run( );
+    while ( true )
+    {
+        uv_run( Service::loop( ) , UV_RUN_DEFAULT );
+    }
 
     return 0;
 }

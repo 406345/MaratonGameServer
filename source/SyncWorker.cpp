@@ -2,12 +2,14 @@
 #include "Define.h"
 
 void SyncWorker::create( const size_t & loop_time , 
-                         const syncworker_callback_t callback , 
+                         const syncworker_callback_t  work_callback , 
+                         const syncworker_after_callback_t  after_callback , 
                          void * data )
 {
     SyncWorker* worker = new SyncWorker();
-    worker->callback_ = callback;
-    worker->loop_time_ = loop_time;
+    worker->cb_work_        = work_callback;
+    worker->cb_after_work_  = after_callback;
+    worker->loop_time_      = loop_time;
     worker->data( data );
     worker->start();
 } 
@@ -20,20 +22,38 @@ void SyncWorker::uv_process_timer_tick_callback( uv_timer_t * handle )
 {
     SyncWorker* worker = static_cast< SyncWorker* >( handle->data );
 
+    if( worker->finished_ )
+    {
+        return;
+    }
+    if( worker->loop_count_ == 0)
+    {
+        worker->loop_count_++;
+        return;
+    }
+
     if ( worker == nullptr )
     {
         uv_timer_stop( handle );
         return;
     }
 
-    bool is_finished   = worker->callback_( worker );
+    worker->finished_  = worker->cb_work_( worker );
 
     ++worker->loop_count_;
 
-    if ( is_finished )
+    if ( worker->finished_ )
     {
-        uv_timer_stop( &worker->timer_ );
-        SAFE_DELETE  ( worker );
+        int result = uv_timer_stop( &worker->timer_ );
+
+        LOG_DEBUG_UV( result );
+
+        if ( worker->cb_after_work_ != nullptr )
+        {
+            worker->cb_after_work_( worker );
+        }
+
+        SAFE_DELETE( worker );
     }
 }
 
@@ -41,7 +61,7 @@ SyncWorker::SyncWorker()
 {
     this->timer_        = { 0 };
     this->timer_.data   = this;
-    this->loop_count_   = 1;
+    this->loop_count_   = 0;
     this->loop_time_    = 1;
 
     uv_timer_init( uv_default_loop() , &this->timer_ );

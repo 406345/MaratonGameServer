@@ -70,8 +70,10 @@ public:                                                     \
 // Debug mode definitions
 #if DEBUG_MODE
 #define LOG_DEBUG(msg_,...) Logger::log("%s:%d "##msg_,__FILE__,__LINE__,##__VA_ARGS__)
+#define LOG_DEBUG_UV(status) if( status != 0 ) Logger::log("%s:%d uv error: %s",__FILE__,__LINE__,uv_strerror((int)status))
 #else
-#define DEBUG(msg_,...) 
+#define LOG_DEBUG(msg_,...) 
+#define LOG_DEBUG_UV(status)
 #endif
 
 // Message definitions

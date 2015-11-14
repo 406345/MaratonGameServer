@@ -1,52 +1,69 @@
 #include "Session.h"
 #include <stdio.h>
 #include "Service.h"
+#include "Server.h"
 
 Session::Session( Service * service )
 {
-    static size_t cur_session_id    = 0;
-    cur_session_id                  = ( cur_session_id + 1 ) % 0xFFFFFFFF;
-    this->session_id_               = cur_session_id;
-    this->recive_buffer_            = new char[SESSION_RECIVE_BUFFER_SIZE];
-
-    memset( this->recive_buffer_, 0, SESSION_RECIVE_BUFFER_SIZE );
-    this->service = service;
+    this->session_id_               = create_session_id();
+    this->service                   = service;
 }
 
 Session::~Session()
 {
-    SAFE_DELETE( this->recive_buffer_ );
+    SAFE_DELETE( this->uv_connect_ );
+    SAFE_DELETE( this->uv_tcp_ );
 }
 
 void Session::on_recive_data( Buffer & buffer )
 {
     char char_buf[512]= { 0 };
     sprintf( char_buf , "Session %d response\r\n" , this->id( ) );
-    Buffer buf( char_buf );
+    Buffer buf( char_buf , 512);
     this->send( buf );
+}
+
+void Session::on_close( )
+{
 }
 
 void Session::close()
 {
+    this->on_close( );
+    uv_tcp_t* uv_tcp  = this->uv_tcp_;
 
+    if( uv_tcp == nullptr )
+    {
+        uv_tcp = this->service->uv_tcp_;
+    }
+    
+    uv_close( (uv_handle_t* ) uv_tcp , Service::uv_callback_close );
 }
 
 void Session::send( Buffer & buffer )
 {
     uv_write_t* write   = new uv_write_t();
-    uv_buf_t* buf       = new uv_buf_t();
-
+    uv_buf_t*   buf     = new uv_buf_t();
+    uv_tcp_t*   uv_tcp  = this->uv_tcp_;
     buf->base           = new char[buffer.size()] { 0 };
     buf->len            = buffer.size();
     write->data         = buf;
 
-    memcpy( buf->base, buffer.data(), buffer.size() );
+    if( uv_tcp == nullptr )
+    { 
+        // This session uses service's uv_tcp_t 
+        // to send data when it is a client
+        // otherwise it uses it's own uv_tcp_t
+        uv_tcp = this->service->uv_tcp_;
+    }
 
-    auto r              = uv_write( write, 
-                                    (uv_stream_t*) this->listener_, 
-                                    buf, 
-                                    1,  
-                                    Session::uv_prcoess_write_callback );
+    memcpy( buf->base, buffer.data(), buffer.size() );
+    
+    auto r  = uv_write( write, 
+                        (uv_stream_t*) uv_tcp, 
+                        buf, 
+                        1,  
+                        Session::uv_prcoess_write_callback );
 
     if ( r != 0 )
     {
@@ -61,4 +78,11 @@ void Session::uv_prcoess_write_callback( uv_write_t * req, int status )
     SAFE_DELETE( buffer->base );
     SAFE_DELETE( buffer );
     SAFE_DELETE( req );
+}
+
+size_t Session::create_session_id( )
+{
+    static size_t session_id    = 0;
+    session_id                  = ( session_id + 1 ) % 0xFFFFFFFF;
+    return session_id;
 }

@@ -14,7 +14,7 @@ public:
     Session( Service* service );
     virtual ~Session();
     
-    virtual void    close();
+    void    close();
     virtual void    send( Buffer & buffer );
 
     size_t          id() { return this->session_id_; };
@@ -22,19 +22,20 @@ public:
 protected:
 
     virtual void    on_recive_data( Buffer & buffer );
+    virtual void    on_close();
 
 private:
 
-    Service*        service;
-    uv_tcp_t*       listener_;
-    char*           recive_buffer_;
+    Service*        service         = nullptr;
+    uv_tcp_t*       uv_tcp_         = nullptr;
+    uv_connect_t*   uv_connect_     = nullptr;
+    char*           recive_buffer_  = nullptr;
+
     size_t          session_id_;
-    uv_connect_t*   connector_;
 
-    char*           recive_buffer() { return this->recive_buffer_; };
     static void     uv_prcoess_write_callback( uv_write_t* req, int status );
-
-    friend class Server;
+    static size_t   create_session_id( );
+    friend class Service;
 };
 
 #endif // SESSION_H_
