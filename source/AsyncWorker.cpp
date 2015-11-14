@@ -1,24 +1,25 @@
 #include "AsyncWorker.h"
 #include "Define.h"
 
-AsyncWorker * AsyncWorker::create( callback_t acting ,
-                                   callback_t finish , void * data )
+void AsyncWorker::create( callback_t acting ,
+                          callback_t finish , 
+                          void * data )
 {
     auto r = new AsyncWorker( acting, finish );
     r->data( data );
     r->start();
-    return r;
 }
 
-AsyncWorker* AsyncWorker::create( callback_t callback, void * data )
+void AsyncWorker::create( callback_t callback, 
+                          void * data )
 {
     auto r = new AsyncWorker( callback , nullptr );
     r->data( data );
     r->start();
-    return r;
 }
 
-AsyncWorker::AsyncWorker( callback_t acting , callback_t finish )
+AsyncWorker::AsyncWorker( callback_t acting , 
+                          callback_t finish )
 {
     this->acting_callback_ = acting;
     this->finish_callback_ = finish;

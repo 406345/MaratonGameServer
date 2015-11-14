@@ -17,12 +17,12 @@ public:
 
     typedef std::function<void( AsyncWorker* )> callback_t;
     
-    static AsyncWorker* create( callback_t acting , 
-                                callback_t finish, 
-                                void* data );
+    static void create( callback_t acting , 
+                        callback_t finish, 
+                        void* data );
 
-    static AsyncWorker* create( callback_t acting , 
-                                void* data );
+    static void create( callback_t acting , 
+                        void* data );
 
 
     void data( void* value ) { this->data_ = value; };

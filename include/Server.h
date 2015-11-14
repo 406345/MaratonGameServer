@@ -4,6 +4,7 @@
 #include <vector>
 #include "uv.h"
 #include "Utils.h"
+#include "Define.h"
 
 class Service;
 
@@ -26,7 +27,7 @@ private:
     
     ~Server() {};
    
-    std::vector<Service*> service_list;
+    std::vector<Service *> service_list;
 
     static void uv_callback_alloc_buffer( uv_handle_t* handle,
                                           size_t suggested_size,

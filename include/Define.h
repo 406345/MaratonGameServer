@@ -51,7 +51,7 @@ public:                                                     \
 #define SINGLETON_END };
 
 
-#define UV_ERROR(__x__) if ( __x__ != 0 ) printf( "uv error: %s", \
+#define LOG_UV_ERROR(__x__) if ( __x__ != 0 ) printf( "uv error: %s", \
                                                   uv_strerror((int)__x__));
 // C11 definitions
 #define UPTR std::unique_ptr
@@ -65,7 +65,7 @@ public:                                                     \
 
 #define MAKE_UPTR(__t__,...) std::unique_ptr< __t__ >( new __t__(__VA_ARGS__) )
 #define MAKE_SPTR(__t__,...) std::make_shared< __t__ >(__VA_ARGS__)
-#define MOVE(__T__) std::move(__T__);
+#define MOVE(__T__) std::move(__T__)
 
 // Debug mode definitions
 #if DEBUG_MODE
@@ -77,5 +77,6 @@ public:                                                     \
 // Message definitions
 #define LOG_SYS(msg_,...) Logger::sys(msg_,__VA_ARGS__)
 #define LOG_EERROR(msg_,...) Logger::error(msg_,__VA_ARGS__)
+#define UV_ERROR(status) uv_strerror((int)status)
 
 #endif // DEFINE_H_

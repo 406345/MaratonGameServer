@@ -15,13 +15,13 @@ public:
     virtual ~Session();
     
     virtual void    close();
-    virtual void    send( Buffer buffer );
+    virtual void    send( Buffer & buffer );
 
     size_t          id() { return this->session_id_; };
 
 protected:
 
-    virtual void    on_recive_data( Buffer buffer );
+    virtual void    on_recive_data( Buffer & buffer );
 
 private:
 

@@ -18,9 +18,12 @@ Session::~Session()
     SAFE_DELETE( this->recive_buffer_ );
 }
 
-void Session::on_recive_data( Buffer buffer )
+void Session::on_recive_data( Buffer & buffer )
 {
-    printf( "recived size:%lld\r\n" , buffer.size() );
+    char char_buf[512]= { 0 };
+    sprintf( char_buf , "Session %d response\r\n" , this->id( ) );
+    Buffer buf( char_buf );
+    this->send( buf );
 }
 
 void Session::close()
@@ -28,7 +31,7 @@ void Session::close()
 
 }
 
-void Session::send( Buffer buffer )
+void Session::send( Buffer & buffer )
 {
     uv_write_t* write   = new uv_write_t();
     uv_buf_t* buf       = new uv_buf_t();
@@ -39,17 +42,15 @@ void Session::send( Buffer buffer )
 
     memcpy( buf->base, buffer.data(), buffer.size() );
 
-    auto r              = uv_write( 
-                                    write, 
+    auto r              = uv_write( write, 
                                     (uv_stream_t*) this->listener_, 
                                     buf, 
                                     1,  
-                                    Session::uv_prcoess_write_callback 
-                                   );
+                                    Session::uv_prcoess_write_callback );
 
     if ( r != 0 )
     {
-        printf( "write error %s" , uv_strerror(r) );
+        LOG_DEBUG("uv errors:%s",UV_ERROR(r));
     }
 }
 

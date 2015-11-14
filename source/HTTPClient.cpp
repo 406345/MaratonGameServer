@@ -44,7 +44,7 @@ void HTTPClient::request( HTTPRequest * req )
                             NULL, 
                             &this->uv_addrinfo_ );
 
-    UV_ERROR( r );
+    LOG_UV_ERROR( r );
 
 }
 
@@ -71,7 +71,7 @@ void HTTPClient::write_data(const char * data, size_t len )
                   buffer, 
                   1, 
                   HTTPClient::uv_process_write );
-    UV_ERROR( r );
+    LOG_UV_ERROR( r );
 
 }
 
@@ -109,7 +109,7 @@ void HTTPClient::uv_process_connected( uv_connect_t * req, int status )
 {
     if ( status < 0 )
     {
-        UV_ERROR( status );
+        LOG_UV_ERROR( status );
         return;
     }
     int r                   = 0;
@@ -123,7 +123,7 @@ void HTTPClient::uv_process_connected( uv_connect_t * req, int status )
     r = uv_read_start( ( uv_stream_t* ) &client->uv_socket_,
                        HTTPClient::uv_process_alloc, 
                        HTTPClient::uv_process_read );
-    UV_ERROR( r );
+    LOG_UV_ERROR( r );
 }
 
 void HTTPClient::uv_process_write( uv_write_t * req, int status )
@@ -149,7 +149,7 @@ void HTTPClient::uv_process_read( uv_stream_t * stream,
     if ( nread < 0 )
     {
         delete buf->base;
-        UV_ERROR( (int)nread );
+        LOG_UV_ERROR( (int)nread );
         uv_close( ( uv_handle_t* ) stream , HTTPClient::uv_process_close );
         return;
     }
