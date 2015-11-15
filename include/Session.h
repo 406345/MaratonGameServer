@@ -1,6 +1,8 @@
 #ifndef SESSION_H_
 #define SESSION_H_
 
+#include <functional>
+
 #include "uv.h"
 #include "Define.h"
 #include "Buffer.h"
@@ -11,15 +13,20 @@ class Session
 {
 public:
 
-    Session( Service* service );
+    typedef std::function<void( Session* )> callback_void_session_t;
+
+    Session( Service* service_ );
     virtual ~Session();
     
     void    close();
     virtual void    send( Buffer & buffer );
 
-    size_t          id  ( ) { return this->session_id_; };
-    std::string     host( );
-    std::string     ip  ( );
+    size_t          id      ( ) { return this->session_id_; };
+    std::string     host    ( );
+    std::string     ip      ( );
+    Service*        service ( );
+
+    void            callback_close( callback_void_session_t callback );
 
 protected:
 
@@ -32,17 +39,18 @@ private:
 
     struct write_token_t
     {
-        uv_write_t *    writer;
-        uv_buf_t *      buffer;
-        Session *       session;
+        uv_write_t *        writer;
+        uv_buf_t *          buffer;
+        Session *           session;
     };
 
-    Service*            service         = nullptr;
-    uv_tcp_t*           uv_tcp_         = nullptr;
-    uv_connect_t*       uv_connect_     = nullptr;
-    char*               recive_buffer_  = nullptr;
+    Service*                service_                = nullptr;
+    uv_tcp_t*               uv_tcp_                 = nullptr;
+    uv_connect_t*           uv_connect_             = nullptr;
+    char*                   recive_buffer_          = nullptr;
 
-    size_t              session_id_;
+    size_t                  session_id_;
+    callback_void_session_t callback_close_      = nullptr;
 
     static void         uv_prcoess_write_callback( uv_write_t* req, int status );
     static size_t       create_session_id( );

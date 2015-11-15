@@ -35,14 +35,15 @@ public:
     Service();
     ~Service();
 
-    void listen                 ( const char* host, int port );
-    void connect                ( const char* host, int port );
-    void stop                   ( );
-    void on_operation_failed    ( service_status_callback_t callback );
-    void on_open_session        ( session_callback_t callback );
-    void on_close_session       ( session_callback_t callback );
+    void listen                         ( const char* host, int port );
+    void connect                        ( const char* host, int port );
+    void stop                           ( );
+    Service::ServiceType service_type   ( );
+    void on_operation_failed            ( service_status_callback_t callback );
+    void on_open_session                ( session_callback_t callback );
+    void on_close_session               ( session_callback_t callback );
 
-    static uv_loop_t * loop     ( );
+    static uv_loop_t * loop             ( );
 
 protected:
 

@@ -1,57 +1,98 @@
 #include "HTTPSession.h"
 
-bool HTTPSession::send_request( HTTPAction * req )
+HTTPSession::HTTPSession( HTTPService * service_ )
+    : Session( service_ )
 {
-    if ( request != nullptr )
+}
+
+bool HTTPSession::send_request( HTTPRequest * req )
+{
+    if ( this->request_ != nullptr )
     {
-        if ( request->finished() )
-        {
-            SAFE_DELETE( request );
-        }
-        else
-        {
-            return false;
-        }
+        this->request_ = req;
     }
 
-    request = req;
-    request->header( "Host", this->ip() );
-    auto msg = request->build_message( );
+    this->request_->header( "Host", this->ip() );
+    auto msg = this->request_->build_http_header( );
     this->send( msg );
     LOG_DEBUG( "%s" , msg.data( ) );
     return true;
 }
 
-void HTTPSession::on_send_finish( size_t size )
+bool HTTPSession::send_response( HTTPResponse * rep )
 {
-    if ( request == nullptr )
+    if ( this->response_ != nullptr )
     {
-        return;
-    }
+        this->response_ = rep;
+    } 
 
-    if( request->finished() )
-    {
-        return;
-    }
-
-    auto msg = request->build_message( );
-
-    if( msg.size() == 0 )
-    {
-        return;
-    }
-
+    this->response_->header( "Host", this->ip() );
+    auto msg = this->response_->build_http_header( );
     this->send( msg );
     LOG_DEBUG( "%s" , msg.data( ) );
+    return true;
+}
+
+void HTTPSession::send( Buffer & buffer )
+{
+    Session::send( buffer );
+}
+
+void HTTPSession::on_send_finish( size_t size )
+{
+    HTTPAction* action_ = this->request_ == nullptr ?
+        static_cast< HTTPAction* >( this->response_ ) :
+        static_cast< HTTPAction* >( this->request_ );
+
+    if ( action_ == nullptr )
+    {
+        return;
+    }
+
+    if( action_->callback_send_content_ == nullptr )
+    {
+        if( action_->callback_send_complete_ != nullptr )
+        {
+            action_->callback_send_complete_( action_ );
+        }
+
+        return;
+    }
+
+    auto msg = action_->callback_send_content_( action_ );
+
+    if( msg == nullptr )
+    {
+        if( action_->callback_send_complete_ != nullptr )
+        {
+            action_->callback_send_complete_( action_ );
+        }
+        return;
+    }
+
+    this->send( *msg );
+    SAFE_DELETE( msg );
 }
 
 void HTTPSession::on_connected( )
-{
-
+{ 
 }
 
 void HTTPSession::on_receive_data( Buffer & buffer )
 {
+    if( this->service()->service_type() == Service::ServiceType::kClient )
+    {
+        SAFE_DELETE( this->response_ );
+        this->response_ = new HTTPResponse( );
+        this->response_->parse( buffer );
+    }
+    else
+    {
+        SAFE_DELETE( this->request_ );
+        this->request_ = new HTTPRequest( );
+        this->request_->parse( buffer );
+    }
+
     LOG_DEBUG( "%s" , buffer.data( ) );
 }
 

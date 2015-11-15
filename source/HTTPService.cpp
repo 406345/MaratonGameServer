@@ -3,5 +3,9 @@
 
 Session * HTTPService::create_session( )
 {
-    return new HTTPSession( this );
+    auto ret = new HTTPSession( this );
+    
+
+
+    return ret;
 }

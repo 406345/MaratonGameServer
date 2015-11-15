@@ -2,10 +2,10 @@
 #include <stdio.h>
 #include "Service.h"
 
-Session::Session( Service * service )
+Session::Session( Service * service_ )
 {
     this->session_id_               = create_session_id();
-    this->service                   = service;
+    this->service_                   = service_;
 }
 
 Session::~Session()
@@ -28,6 +28,10 @@ void Session::on_receive_data( Buffer & buffer )
 
 void Session::on_close( )
 {
+    if( this->callback_close_ != nullptr )
+    {
+        this->callback_close_( this );
+    }
 }
 
 void Session::on_send_finish( size_t size )
@@ -36,12 +40,11 @@ void Session::on_send_finish( size_t size )
 
 void Session::close()
 {
-    this->on_close( );
     uv_tcp_t* uv_tcp  = this->uv_tcp_;
 
     if( uv_tcp == nullptr )
     {
-        uv_tcp = this->service->uv_tcp_;
+        uv_tcp = this->service_->uv_tcp_;
     }
     
     uv_close( (uv_handle_t* ) uv_tcp , Service::uv_callback_close );
@@ -64,7 +67,7 @@ void Session::send( Buffer & buffer )
         // This session uses service's uv_tcp_t 
         // to send data when it is a client
         // otherwise it uses it's own uv_tcp_t
-        uv_tcp = this->service->uv_tcp_;
+        uv_tcp = this->service_->uv_tcp_;
     }
 
     memcpy( write_token->buffer->base, buffer.data(), buffer.size() );
@@ -83,14 +86,24 @@ void Session::send( Buffer & buffer )
 
 std::string Session::host( )
 {
-    return std::string(this->service->host_);
+    return std::string(this->service_->host_);
 }
 
 std::string Session::ip( )
 {
-    return std::string(this->service->ip_);
+    return std::string(this->service_->ip_);
 }
 
+Service * Session::service( )
+{
+    return this->service_;
+}
+
+void Session::callback_close( callback_void_session_t callback )
+{
+    this->callback_close_ = callback;
+}
+ 
 void Session::uv_prcoess_write_callback( uv_write_t * req, int status )
 {
     if( status < 0 )

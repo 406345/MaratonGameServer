@@ -16,7 +16,7 @@ class HTTPResponse :
 public:
 
     HTTPResponse( );
-    virtual Buffer build_message( ) override;
+    virtual Buffer build_http_header( ) override;
 
 private:
 

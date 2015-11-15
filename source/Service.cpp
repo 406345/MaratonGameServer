@@ -73,6 +73,11 @@ void Service::stop( )
     }
 }
 
+Service::ServiceType Service::service_type( )
+{
+    return this->service_type_;
+}
+
 void Service::on_operation_failed( service_status_callback_t callback )
 {
     this->operation_failed_callback_ = callback;
@@ -158,7 +163,7 @@ void Service::uv_callback_read( uv_stream_t * stream ,
 void Service::uv_callback_close( uv_handle_t * handle )
 {
     Session * session   = static_cast < Session* > ( handle->data );
-    Service* service    = session->service;
+    Service* service_    = session->service_;
    
     if( session == nullptr )
     {
@@ -166,29 +171,31 @@ void Service::uv_callback_close( uv_handle_t * handle )
         return;
     } 
 
-    if( service == nullptr )
+    if( service_ == nullptr )
     {
         LOG_DEBUG( "Session owner is nullptr" );
         return;
     }
 
+    session->on_close( );
+
     if( session->uv_tcp_ == nullptr )
     {
         // Service is client mode
-        service->remove_session( session );
+        service_->remove_session( session );
     }
     else
     {
         // Service is server mode
-        service->remove_session( session );
+        service_->remove_session( session );
     }
 }
 
 void Service::uv_callback_service_close( uv_handle_t * handle )
 {
-    Service * service = static_cast < Service* > ( handle->data );
+    Service * service_ = static_cast < Service* > ( handle->data );
 
-    if ( service == nullptr )
+    if ( service_ == nullptr )
     {
         LOG_DEBUG( "Service is nullptr" );
         return;
@@ -198,7 +205,7 @@ void Service::uv_callback_service_close( uv_handle_t * handle )
 void Service::uv_callback_new_connection( uv_stream_t * server , int status )
 {
     int result = 0;
-    Service * service = static_cast < Service* > ( server->data );
+    Service * service_ = static_cast < Service* > ( server->data );
 
     if( status != 0 )
     {
@@ -206,7 +213,7 @@ void Service::uv_callback_new_connection( uv_stream_t * server , int status )
         return;
     }
 
-    if( service == nullptr )
+    if( service_ == nullptr )
     {
         LOG_DEBUG( "uv_callback_connected: Service is nullptr" );
         return;
@@ -214,7 +221,7 @@ void Service::uv_callback_new_connection( uv_stream_t * server , int status )
 
     LOG_DEBUG( "new connection" );
 
-    Session * session       = service->create_session( );
+    Session * session       = service_->create_session( );
     session->uv_tcp_        = new uv_tcp_t( );
     memset( session->uv_tcp_ , 0 , sizeof( uv_tcp_t ) );
     session->uv_tcp_->data  = session;
@@ -225,7 +232,13 @@ void Service::uv_callback_new_connection( uv_stream_t * server , int status )
 
     if ( result == 0 )
     {
-        service->add_session( session );
+        service_->add_session( session );
+        
+        if( service_->new_session_callback_ != nullptr)
+        {
+            service_->new_session_callback_( session );
+        }
+
         result = uv_read_start( ( uv_stream_t* ) session->uv_tcp_ , 
                             Service::uv_callback_alloc_buffer , 
                             Service::uv_callback_read );
@@ -241,43 +254,43 @@ void Service::uv_callback_new_connection( uv_stream_t * server , int status )
 void Service::uv_callback_connected( uv_connect_t * req , int status )
 {
     int result = 0;
-    Service * service = static_cast < Service* > ( req->data );
+    Service * service_ = static_cast < Service* > ( req->data );
 
     if( status != 0 )
     {
         LOG_DEBUG_UV( status );
         
-        if ( service->operation_failed_callback_ != nullptr )
+        if ( service_->operation_failed_callback_ != nullptr )
         {
-            service->operation_failed_callback_( service , status );
+            service_->operation_failed_callback_( service_ , status );
         }
 
-        uv_close( ( uv_handle_t* ) service->uv_tcp_ , 
+        uv_close( ( uv_handle_t* ) service_->uv_tcp_ , 
                   Service::uv_callback_service_close );
         return;
     }
 
-    if( service == nullptr )
+    if( service_ == nullptr )
     {
         LOG_DEBUG( "uv_callback_connected: Service is nullptr" );
         return;
     }
 
-    LOG_DEBUG( "%s:%d connected" , service->host_ , service->port_ );
+    LOG_DEBUG( "%s:%d connected" , service_->host_ , service_->port_ );
 
-    Session* session = service->create_session( );
+    Session* session = service_->create_session( );
 
-    if( service->new_session_callback_ != nullptr )
+    if( service_->new_session_callback_ != nullptr )
     {
-        service->new_session_callback_( session );
+        service_->new_session_callback_( session );
     }
 
-    service->uv_tcp_->data  = session;
+    service_->uv_tcp_->data  = session;
 
-    service->add_session( session );
+    service_->add_session( session );
     session->on_connected( );
 
-    result                  = uv_read_start( ( uv_stream_t* ) service->uv_tcp_ , 
+    result                  = uv_read_start( ( uv_stream_t* ) service_->uv_tcp_ , 
                                             Service::uv_callback_alloc_buffer , 
                                             Service::uv_callback_read );
     LOG_DEBUG_UV( result );
@@ -288,44 +301,44 @@ void Service::uv_process_resolved( uv_getaddrinfo_t * req ,
                                    addrinfo * res )
 {
     int result = 0;
-    Service * service = static_cast < Service* > ( req->data );
+    Service * service_ = static_cast < Service* > ( req->data );
 
-    if ( service == nullptr )
+    if ( service_ == nullptr )
     {
         LOG_DEBUG( "Service is nullptr" );
         return;
     }
      
-    service->uv_tcp_->data       = service;
-    service->uv_connect_->data   = service;
+    service_->uv_tcp_->data       = service_;
+    service_->uv_connect_->data   = service_;
     
-    uv_ip4_name( ( struct sockaddr_in* ) res->ai_addr , service->ip_ , 16 );
-    uv_ip4_addr( service->ip_ , service->port_ , &service->addr_in );
+    uv_ip4_name( ( struct sockaddr_in* ) res->ai_addr , service_->ip_ , 16 );
+    uv_ip4_addr( service_->ip_ , service_->port_ , &service_->addr_in );
 
-    if ( service->service_type_ == Service::ServiceType::kServer )
+    if ( service_->service_type_ == Service::ServiceType::kServer )
     {
         result = uv_tcp_init( Service::loop( ) ,
-                              service->uv_tcp_ );
+                              service_->uv_tcp_ );
         LOG_DEBUG_UV( result );
 
-        service->uv_tcp_->data  = service;
+        service_->uv_tcp_->data  = service_;
 
-        result = uv_tcp_bind( service->uv_tcp_ ,
-                              ( const struct sockaddr* )&service->addr_in ,
+        result = uv_tcp_bind( service_->uv_tcp_ ,
+                              ( const struct sockaddr* )&service_->addr_in ,
                               0 );
         LOG_DEBUG_UV( result );
 
-        result = uv_listen( ( uv_stream_t* ) service->uv_tcp_ ,
+        result = uv_listen( ( uv_stream_t* ) service_->uv_tcp_ ,
                             0 ,
                             Service::uv_callback_new_connection );
         LOG_DEBUG_UV( result );
     }
-    else if ( service->service_type_ == Service::ServiceType::kClient )
+    else if ( service_->service_type_ == Service::ServiceType::kClient )
     {
-        uv_tcp_init( Service::loop() , service->uv_tcp_ );
-        result = uv_tcp_connect( service->uv_connect_ , 
-                                 service->uv_tcp_ ,
-                                 ( const struct sockaddr* ) &service->addr_in ,
+        uv_tcp_init( Service::loop() , service_->uv_tcp_ );
+        result = uv_tcp_connect( service_->uv_connect_ , 
+                                 service_->uv_tcp_ ,
+                                 ( const struct sockaddr* ) &service_->addr_in ,
                                  Service::uv_callback_connected );
         LOG_DEBUG_UV( result );
     }
