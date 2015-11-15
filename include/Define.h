@@ -10,6 +10,8 @@
 // Cast definitions
 #define CIRCLE_BUFFER_SIZE          1024 * 1024
 #define SESSION_RECIVE_BUFFER_SIZE  1024 * 128
+#define HOST_NAME_SIZE              512
+#define IP_STRING_SIZE              16
 
 // Macro function definitions
 #define PP_DEF(__type__,__name__)                           \
@@ -81,4 +83,4 @@ public:                                                     \
 #define LOG_EERROR(msg_,...) Logger::error(msg_,__VA_ARGS__)
 #define UV_ERROR(status) uv_strerror((int)status)
 
-#endif // DEFINE_H_
+#endif // !DEFINE_H_

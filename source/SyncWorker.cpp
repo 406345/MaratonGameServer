@@ -6,7 +6,7 @@ void SyncWorker::create( const size_t & loop_time ,
                          const syncworker_after_callback_t  after_callback , 
                          void * data )
 {
-    SyncWorker* worker = new SyncWorker();
+    SyncWorker* worker      = new SyncWorker();
     worker->cb_work_        = work_callback;
     worker->cb_after_work_  = after_callback;
     worker->loop_time_      = loop_time;
@@ -26,6 +26,7 @@ void SyncWorker::uv_process_timer_tick_callback( uv_timer_t * handle )
     {
         return;
     }
+
     if( worker->loop_count_ == 0)
     {
         worker->loop_count_++;
@@ -44,15 +45,16 @@ void SyncWorker::uv_process_timer_tick_callback( uv_timer_t * handle )
 
     if ( worker->finished_ )
     {
-        int result = uv_timer_stop( &worker->timer_ );
 
-        LOG_DEBUG_UV( result );
 
         if ( worker->cb_after_work_ != nullptr )
         {
             worker->cb_after_work_( worker );
         }
 
+        int result = uv_timer_stop( &worker->timer_ );
+        LOG_DEBUG_UV( result );
+        
         SAFE_DELETE( worker );
     }
 }

@@ -13,9 +13,6 @@
     <ClCompile Include="..\source\Service.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="..\source\Server.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
     <ClCompile Include="..\source\Session.cpp">
       <Filter>source</Filter>
     </ClCompile>
@@ -28,12 +25,6 @@
     <ClCompile Include="..\source\SessionManager.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="..\source\HTTPClient.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\source\HTTPRequest.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
     <ClCompile Include="..\source\Buffer.cpp">
       <Filter>source</Filter>
     </ClCompile>
@@ -43,12 +34,24 @@
     <ClCompile Include="..\source\SyncWorker.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="..\source\HTTPService.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\HTTPSession.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\HTTPAction.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\HTTPResponse.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\HTTPRequest.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\Service.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\Server.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\Define.h">
@@ -66,12 +69,6 @@
     <ClInclude Include="..\include\SessionManager.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\HTTPClient.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\HTTPRequest.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\Buffer.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -82,6 +79,21 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\Logger.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\HTTPService.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\HTTPSession.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\HTTPResponse.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\HTTPAction.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\HTTPRequest.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

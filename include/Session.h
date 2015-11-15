@@ -17,24 +17,35 @@ public:
     void    close();
     virtual void    send( Buffer & buffer );
 
-    size_t          id() { return this->session_id_; };
+    size_t          id  ( ) { return this->session_id_; };
+    std::string     host( );
+    std::string     ip  ( );
 
 protected:
 
-    virtual void    on_recive_data( Buffer & buffer );
+    virtual void    on_connected( );
+    virtual void    on_receive_data( Buffer & buffer );
     virtual void    on_close();
+    virtual void    on_send_finish( size_t size );
 
 private:
 
-    Service*        service         = nullptr;
-    uv_tcp_t*       uv_tcp_         = nullptr;
-    uv_connect_t*   uv_connect_     = nullptr;
-    char*           recive_buffer_  = nullptr;
+    struct write_token_t
+    {
+        uv_write_t *    writer;
+        uv_buf_t *      buffer;
+        Session *       session;
+    };
 
-    size_t          session_id_;
+    Service*            service         = nullptr;
+    uv_tcp_t*           uv_tcp_         = nullptr;
+    uv_connect_t*       uv_connect_     = nullptr;
+    char*               recive_buffer_  = nullptr;
 
-    static void     uv_prcoess_write_callback( uv_write_t* req, int status );
-    static size_t   create_session_id( );
+    size_t              session_id_;
+
+    static void         uv_prcoess_write_callback( uv_write_t* req, int status );
+    static size_t       create_session_id( );
     friend class Service;
 };
 

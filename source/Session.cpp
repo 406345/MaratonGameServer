@@ -1,7 +1,6 @@
 #include "Session.h"
 #include <stdio.h>
 #include "Service.h"
-#include "Server.h"
 
 Session::Session( Service * service )
 {
@@ -15,7 +14,11 @@ Session::~Session()
     SAFE_DELETE( this->uv_tcp_ );
 }
 
-void Session::on_recive_data( Buffer & buffer )
+void Session::on_connected( )
+{
+}
+
+void Session::on_receive_data( Buffer & buffer )
 {
     char char_buf[512]= { 0 };
     sprintf( char_buf , "Session %d response\r\n" , this->id( ) );
@@ -24,6 +27,10 @@ void Session::on_recive_data( Buffer & buffer )
 }
 
 void Session::on_close( )
+{
+}
+
+void Session::on_send_finish( size_t size )
 {
 }
 
@@ -42,12 +49,15 @@ void Session::close()
 
 void Session::send( Buffer & buffer )
 {
-    uv_write_t* write   = new uv_write_t();
-    uv_buf_t*   buf     = new uv_buf_t();
-    uv_tcp_t*   uv_tcp  = this->uv_tcp_;
-    buf->base           = new char[buffer.size()] { 0 };
-    buf->len            = buffer.size();
-    write->data         = buf;
+    write_token_t* write_token = new write_token_t;
+    write_token->writer         = new uv_write_t();
+    write_token->buffer         = new uv_buf_t();
+    write_token->buffer->base   = new char[buffer.size()] { 0 };
+    write_token->buffer->len    = buffer.size();
+    write_token->writer->data   = write_token;
+    write_token->session        = this;
+
+    uv_tcp_t*   uv_tcp          = this->uv_tcp_;
 
     if( uv_tcp == nullptr )
     { 
@@ -57,11 +67,11 @@ void Session::send( Buffer & buffer )
         uv_tcp = this->service->uv_tcp_;
     }
 
-    memcpy( buf->base, buffer.data(), buffer.size() );
+    memcpy( write_token->buffer->base, buffer.data(), buffer.size() );
     
-    auto r  = uv_write( write, 
+    auto r  = uv_write( write_token->writer, 
                         (uv_stream_t*) uv_tcp, 
-                        buf, 
+                        write_token->buffer, 
                         1,  
                         Session::uv_prcoess_write_callback );
 
@@ -71,12 +81,32 @@ void Session::send( Buffer & buffer )
     }
 }
 
+std::string Session::host( )
+{
+    return std::string(this->service->host_);
+}
+
+std::string Session::ip( )
+{
+    return std::string(this->service->ip_);
+}
+
 void Session::uv_prcoess_write_callback( uv_write_t * req, int status )
 {
-    uv_buf_t* buffer = static_cast< uv_buf_t* >( req->data );
+    if( status < 0 )
+    {
+        LOG_DEBUG_UV( status );
+        return;
+    }
+
+    write_token_t* write_token  = static_cast< write_token_t* >( req->data );
+    uv_buf_t* buffer            = write_token->buffer;
+
+    write_token->session->on_send_finish( buffer->len );
 
     SAFE_DELETE( buffer->base );
     SAFE_DELETE( buffer );
+    SAFE_DELETE( write_token );
     SAFE_DELETE( req );
 }
 

@@ -24,10 +24,11 @@ public:
                               const syncworker_after_callback_t  after_callback , 
                               void* data );
      
-    void*       data( ) { return this->data_; };
-    void        data( void* value ) { this->data_ = value; };
-    void        stop( );
-    size_t      loop_count( ) { return loop_count_; };
+    void*       data        ( ) { return this->data_; };
+    void        data        ( void* value ) { this->data_ = value; };
+    void        stop        ( );
+    size_t      loop_count  ( ) { return loop_count_; };
+    size_t      loop_time   ( ) { return loop_time_ * loop_count_; };
 
 private:
 

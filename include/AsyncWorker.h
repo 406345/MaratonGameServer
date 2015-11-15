@@ -11,22 +11,31 @@
 #include <functional>
 #include "uv.h"
 
+class AsyncWorker;
+
+class IAsyncWorkerNotifier
+{
+public:
+    virtual void on_async_work( AsyncWorker* worker) = 0;
+    virtual void on_async_work_finish( AsyncWorker* worker ) = 0;
+};
+
 class AsyncWorker
 {
 public:
 
     typedef std::function<void( AsyncWorker* )> callback_t;
     
-    static void create( callback_t acting , 
-                        callback_t finish, 
-                        void* data );
+    static void create  ( callback_t acting , 
+                          callback_t finish, 
+                          void* data );
 
-    static void create( callback_t acting , 
-                        void* data );
+    static void create  ( callback_t acting , 
+                          void* data );
 
 
-    void data( void* value ) { this->data_ = value; };
-    void* data() { return this->data_; };
+    void data           ( void* value ) { this->data_ = value; };
+    void* data          () { return this->data_; };
 
 private:
 
@@ -34,10 +43,10 @@ private:
 
     void start();
 
-    void* data_;
-    uv_work_t worker;
-    callback_t acting_callback_;
-    callback_t finish_callback_;
+    void*       data_;
+    uv_work_t   worker;
+    callback_t  acting_callback_;
+    callback_t  finish_callback_;
 
     static void uv_process_work_callback( uv_work_t* req );
     static void uv_process_after_work_callback( uv_work_t* req , int status );

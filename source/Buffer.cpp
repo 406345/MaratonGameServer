@@ -44,9 +44,14 @@ char * Buffer::data()
 void Buffer::data( const char * value , size_t size )
 {
     SAFE_DELETE( this->data_ );
-  
-    this->data_ = new char[size] { 0 };
     this->size_ = size;
+  
+    if( value == nullptr )
+    {
+        return;
+    }
+
+    this->data_ = new char[size] { 0 };
 
     memcpy( this->data_ , value , size );
 }

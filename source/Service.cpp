@@ -1,5 +1,4 @@
 #include "Service.h"
-#include "Server.h"
 #include "SessionManager.h"
 
 Service::Service( )
@@ -79,7 +78,7 @@ void Service::on_operation_failed( service_status_callback_t callback )
     this->operation_failed_callback_ = callback;
 }
 
-void Service::on_new_session( session_callback_t callback )
+void Service::on_open_session( session_callback_t callback )
 {
     this->new_session_callback_ = callback;
 }
@@ -151,7 +150,7 @@ void Service::uv_callback_read( uv_stream_t * stream ,
     
     Buffer buffer( buf->base , nread );
     
-    session->on_recive_data( buffer );
+    session->on_receive_data( buffer );
 
     delete buf->base;
 }
@@ -273,11 +272,14 @@ void Service::uv_callback_connected( uv_connect_t * req , int status )
         service->new_session_callback_( session );
     }
 
-    service->uv_tcp_->data = session;
+    service->uv_tcp_->data  = session;
+
     service->add_session( session );
-    result = uv_read_start( ( uv_stream_t* ) service->uv_tcp_ , 
-                            Service::uv_callback_alloc_buffer , 
-                            Service::uv_callback_read );
+    session->on_connected( );
+
+    result                  = uv_read_start( ( uv_stream_t* ) service->uv_tcp_ , 
+                                            Service::uv_callback_alloc_buffer , 
+                                            Service::uv_callback_read );
     LOG_DEBUG_UV( result );
 }
 
@@ -293,13 +295,12 @@ void Service::uv_process_resolved( uv_getaddrinfo_t * req ,
         LOG_DEBUG( "Service is nullptr" );
         return;
     }
-
-    char addr[17]                = { 0 };
+     
     service->uv_tcp_->data       = service;
     service->uv_connect_->data   = service;
-
-    uv_ip4_name( ( struct sockaddr_in* ) res->ai_addr , addr , 16 );
-    uv_ip4_addr( addr , service->port_ , &service->addr_in );
+    
+    uv_ip4_name( ( struct sockaddr_in* ) res->ai_addr , service->ip_ , 16 );
+    uv_ip4_addr( service->ip_ , service->port_ , &service->addr_in );
 
     if ( service->service_type_ == Service::ServiceType::kServer )
     {

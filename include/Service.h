@@ -1,3 +1,10 @@
+/* * * * * * * * * * * * * * * *
+* YHGenomics Inc.
+* Author     : yang shubo
+* Date       : 2015-11-13
+* Description:
+* * * * * * * * * * * * * * * */
+
 #ifndef SERVICE_H_
 #define SERVICE_H_
 
@@ -32,7 +39,7 @@ public:
     void connect                ( const char* host, int port );
     void stop                   ( );
     void on_operation_failed    ( service_status_callback_t callback );
-    void on_new_session         ( session_callback_t callback );
+    void on_open_session        ( session_callback_t callback );
     void on_close_session       ( session_callback_t callback );
 
     static uv_loop_t * loop     ( );
@@ -40,11 +47,12 @@ public:
 protected:
 
     virtual Session* create_session();
-     
+    int                     port_                       = 0;
+    char                    host_[HOST_NAME_SIZE]       = { 0 };
+    char                    ip_[IP_STRING_SIZE]         = { 0 };
+   
 private:
     
-    int                     port_                       = 0;
-    char                    host_[512]                  = {0};
     ServiceType             service_type_               = ServiceType::kUnknow;
     std::vector<Session*>   session_list_;
 

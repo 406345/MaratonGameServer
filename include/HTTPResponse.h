@@ -5,18 +5,22 @@
 * Description:
 * * * * * * * * * * * * * * * */
 
-#ifndef HTTP_REQEUST_H_
-#define HTTP_REQEUST_H_
+#ifndef HTTP_RESPONSE_H_
+#define HTTP_RESPONSE_H_
 
 #include "HTTPAction.h"
 
-class HTTPRequest : 
+class HTTPResponse :
     public HTTPAction
 {
 public:
 
-    HTTPRequest( );
+    HTTPResponse( );
     virtual Buffer build_message( ) override;
+
+private:
+
+
 };
 
-#endif // !HTTP_REQEUST_H_
+#endif // !HTTP_RESPONSE_H_
